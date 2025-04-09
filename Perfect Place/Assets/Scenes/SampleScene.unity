@@ -669,11 +669,11 @@ RectTransform:
   - {fileID: 1216442362}
   m_Father: {fileID: 1303566989}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -200, y: 90}
-  m_SizeDelta: {x: 350, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 10.400024}
+  m_SizeDelta: {x: 1000, y: 100}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!1001 &151427031
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2490,7 +2490,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 200, y: 90}
+  m_AnchoredPosition: {x: 200, y: -530.1}
   m_SizeDelta: {x: 350, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &757129357
@@ -2804,9 +2804,10 @@ MonoBehaviour:
   stream: 1
   playerName: Human
   AIName: Adam
-  prompt: A chat between a curious human and an artificial intelligence assistant
-    named Adam. The assistant gives helpful, detailed, and polite answers to the
-    human's questions.
+  prompt: 'A chat between a travel agent human and a person named Bob. The business
+    person is currently in travel agent location called "Perfect Place". You trying
+    to agree with travel agent where your trip will be. You prefer calm and quiet
+    places. When you feel you agreed with travel agent say "Yay". '
   setNKeepToPrompt: 1
   chat: []
   grammarString: 
@@ -3598,16 +3599,16 @@ RectTransform:
   m_GameObject: {fileID: 1238613323}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.01, y: 1.01, z: 1}
+  m_LocalScale: {x: 1, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1303566989}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 1280, y: 1181}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1238613325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3855,7 +3856,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 550, y: -529.7}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1330745293
@@ -5284,11 +5285,14 @@ MonoBehaviour:
   nKeep: -1
   stop: []
   stream: 1
-  playerName: Human
-  AIName: Eve
-  prompt: A chat between a curious human and an artificial intelligence assistant
-    named Eve. The assistant gives helpful, detailed, and polite answers to the human's
-    questions.
+  playerName: Agent
+  AIName: Bob
+  prompt: 'A chat between a travel agent human and an business person named Bob.
+    The business person is currently in travel agent location called "Perfect Place".
+    You trying to agree with travel agent where your trip will be. You prefer calm
+    and quiet places. Your feeling bored and sarcastic. When you feel you agreed
+    with travel agent say "Yay" and give a rating out of 0 to 3 stars of how well
+    it went. '
   setNKeepToPrompt: 1
   chat: []
   grammarString: 
