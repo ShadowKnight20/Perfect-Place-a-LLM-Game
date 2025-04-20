@@ -41,7 +41,7 @@ namespace LLMUnity
         [LLMAdvanced] public int parallelPrompts = -1;
         /// <summary> do not destroy the LLM GameObject when loading a new Scene. </summary>
         [Tooltip("do not destroy the LLM GameObject when loading a new Scene.")]
-        [LLMAdvanced] public bool dontDestroyOnLoad = true;
+        [LLMAdvanced] public bool dontDestroyOnLoad = true; //Originaly True Self Note Kris
         /// <summary> Size of the prompt context (0 = context size of the model).
         /// This is the number of tokens the model can take as input when generating responses. </summary>
         [Tooltip("Size of the prompt context (0 = context size of the model). This is the number of tokens the model can take as input when generating responses.")]

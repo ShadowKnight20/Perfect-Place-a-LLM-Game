@@ -54,11 +54,17 @@ public class CustomerManager : MonoBehaviour
     public void SendCustomerAway()
     {
         if (currentCustomer == null) return;
-
         var input = currentCustomer.GetComponentInChildren<InputField>();
         if (input != null)
         {
-            input.onSubmit.RemoveAllListeners(); // important: prevent lingering listeners
+            input.onSubmit.RemoveAllListeners();
+        }
+
+        var llm = currentCustomer.GetComponentInChildren<LLMCharacter>();
+        if (llm != null)
+        {
+            //llm.Reset();
+            llm.CancelRequests(); // Cancel previous AI request
         }
 
         movementScript.MoveTo(exitPoint.position);
