@@ -2,11 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using LLMUnity;
 using System.Collections.Generic;
-using LLMUnitySamples; 
+using LLMUnitySamples;
+using System.Text.RegularExpressions;
 
 public class CustomerManager : MonoBehaviour
 {
-    public GameObject[] customerPrefabs; // Now supports multiple prefabs
+    public GameObject[] customerPrefabs;
     public Transform spawnPoint;
     public Transform targetPoint;
     public Transform exitPoint;
@@ -16,10 +17,13 @@ public class CustomerManager : MonoBehaviour
     private CustomerMovement movementScript;
 
     private List<MultipleCharactersInteraction> activeInteractions = new List<MultipleCharactersInteraction>();
+    private bool hasPaidCustomer = false;
 
     public void SpawnCustomer()
     {
         if (currentCustomer != null) return;
+
+        hasPaidCustomer = false;
 
         GameObject prefab = customerPrefabs[Random.Range(0, customerPrefabs.Length)];
         currentCustomer = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
@@ -27,42 +31,63 @@ public class CustomerManager : MonoBehaviour
         movementScript = currentCustomer.GetComponent<CustomerMovement>();
         movementScript.MoveTo(counterPoint.position);
 
-        // Setup AI Input-Output connection
-        var llm = currentCustomer.GetComponentInChildren<LLMCharacter>();
+        var llms = currentCustomer.GetComponentsInChildren<LLMCharacter>();
         var input = currentCustomer.GetComponentInChildren<InputField>();
-        var output = currentCustomer.GetComponentInChildren<Text>();
+        var outputs = currentCustomer.GetComponentsInChildren<Text>();
 
-        if (llm != null && input != null && output != null)
+        if (llms.Length >= 2 && input != null && outputs.Length >= 2)
         {
-            input.onSubmit.RemoveAllListeners(); // safety check
+            var motherLLM = llms[0];
+            var childLLM = llms[1];
+            var motherOutput = outputs[0];
+            var childOutput = outputs[1];
+
+            input.onSubmit.RemoveAllListeners();
             input.onSubmit.AddListener((msg) =>
             {
                 input.interactable = false;
-                output.text = "...";
-                _ = llm.Chat(msg, response =>
+                motherOutput.text = "...";
+
+                _ = motherLLM.Chat(msg, motherResponse =>
                 {
-                    output.text = response;
+                    motherOutput.text = motherResponse;
                     input.interactable = true;
                     input.text = "";
                     input.Select();
 
-                    if (response.Contains("$"))
+                    if (!hasPaidCustomer && motherResponse.Contains("$"))
                     {
-                        int gold = ExtractMoneyAmount(response);
+                        int gold = ExtractMoneyAmount(motherResponse);
                         if (gold > 0)
                         {
                             Object.FindAnyObjectByType<PlayerMoney>().AddMoney(gold);
+                            hasPaidCustomer = true;
                         }
+                    }
+
+                    if (motherResponse.Contains("[talk to child]"))
+                    {
+                        string toChild = motherResponse.Replace("[talk to child]", "").Trim();
+                        _ = childLLM.Chat("Mom says: " + toChild, childResponse =>
+                        {
+                            childOutput.text = childResponse;
+                        });
+                    }
+                    else if (Random.value < 0.5f) // child sometimes replies independently
+                    {
+                        _ = childLLM.Chat("The player said: " + msg, childResponse =>
+                        {
+                            childOutput.text = childResponse;
+                        });
                     }
                 });
             });
         }
     }
 
-
     int ExtractMoneyAmount(string response)
     {
-        var match = System.Text.RegularExpressions.Regex.Match(response, @"\$(\d+)");
+        var match = Regex.Match(response, @"\\$(\\d+)");
         if (match.Success)
         {
             return int.Parse(match.Groups[1].Value);
@@ -73,20 +98,18 @@ public class CustomerManager : MonoBehaviour
     public void SendCustomerAway()
     {
         if (currentCustomer == null) return;
+
         var input = currentCustomer.GetComponentInChildren<InputField>();
         if (input != null)
         {
             input.onSubmit.RemoveAllListeners();
         }
 
-        var llm = currentCustomer.GetComponentInChildren<LLMCharacter>();
-        if (llm != null)
+        var llms = currentCustomer.GetComponentsInChildren<LLMCharacter>();
+        foreach (var llm in llms)
         {
-            //llm.Reset();
-            llm.CancelRequests(); // Cancel previous AI request
+            llm.CancelRequests();
         }
-
-
 
         movementScript.MoveTo(exitPoint.position);
         movementScript.OnDestinationReached = () =>
@@ -104,7 +127,6 @@ public class CustomerManager : MonoBehaviour
         }
 
         var llms = Object.FindObjectsByType<LLMCharacter>(FindObjectsSortMode.None);
-
         foreach (var llm in llms)
         {
             llm.CancelRequests();
