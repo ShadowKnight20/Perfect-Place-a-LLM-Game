@@ -45,11 +45,30 @@ public class CustomerManager : MonoBehaviour
                     input.interactable = true;
                     input.text = "";
                     input.Select();
+
+                    if (response.Contains("$"))
+                    {
+                        int gold = ExtractMoneyAmount(response);
+                        if (gold > 0)
+                        {
+                            Object.FindAnyObjectByType<PlayerMoney>().AddMoney(gold);
+                        }
+                    }
                 });
             });
         }
     }
 
+
+    int ExtractMoneyAmount(string response)
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(response, @"\$(\d+)");
+        if (match.Success)
+        {
+            return int.Parse(match.Groups[1].Value);
+        }
+        return 0;
+    }
 
     public void SendCustomerAway()
     {
@@ -66,6 +85,8 @@ public class CustomerManager : MonoBehaviour
             //llm.Reset();
             llm.CancelRequests(); // Cancel previous AI request
         }
+
+
 
         movementScript.MoveTo(exitPoint.position);
         movementScript.OnDestinationReached = () =>
