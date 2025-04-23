@@ -2284,17 +2284,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50e3140c3ecaaf1c848dbf141cc2074, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  advancedOptions: 0
+  advancedOptions: 1
   remote: 0
   port: 13333
-  numThreads: -1
-  numGPULayers: 0
+  numThreads: 4
+  numGPULayers: 20
   debug: 0
-  parallelPrompts: -1
+  parallelPrompts: 5
   dontDestroyOnLoad: 1
   contextSize: 8192
   batchSize: 512
-  model: Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
+  model: llama-3.2-3b-instruct-q4_k_m.gguf
   chatTemplate: llama3 chat
   lora: 
   loraWeights: 
@@ -2307,7 +2307,7 @@ MonoBehaviour:
   minContextLength: 0
   maxContextLength: 131072
   embeddingsOnly: 0
-  embeddingLength: 4096
+  embeddingLength: 3072
 --- !u!4 &923707490
 Transform:
   m_ObjectHideFlags: 0
