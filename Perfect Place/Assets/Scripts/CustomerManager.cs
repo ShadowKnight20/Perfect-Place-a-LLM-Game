@@ -12,18 +12,27 @@ public class CustomerManager : MonoBehaviour
     public Transform targetPoint;
     public Transform exitPoint;
     public Transform counterPoint;
+    public Button submitButton; // Button for submitting input
 
     private GameObject currentCustomer;
     private CustomerMovement movementScript;
 
     private List<MultipleCharactersInteraction> activeInteractions = new List<MultipleCharactersInteraction>();
     private bool hasPaidCustomer = false;
+    private bool isConversationActive = false;
+
+    private InputField currentInput;
+    private LLMCharacter llmPrimary;
+    private LLMCharacter llmSecondary;
+    private Text outputPrimary;
+    private Text outputSecondary;
 
     public void SpawnCustomer()
     {
         if (currentCustomer != null) return;
 
         hasPaidCustomer = false;
+        isConversationActive = true;
 
         GameObject prefab = customerPrefabs[Random.Range(0, customerPrefabs.Length)];
         currentCustomer = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
@@ -32,62 +41,89 @@ public class CustomerManager : MonoBehaviour
         movementScript.MoveTo(counterPoint.position);
 
         var llms = currentCustomer.GetComponentsInChildren<LLMCharacter>();
-        var input = currentCustomer.GetComponentInChildren<InputField>();
+        var inputs = currentCustomer.GetComponentsInChildren<InputField>();
         var outputs = currentCustomer.GetComponentsInChildren<Text>();
 
-        if (llms.Length >= 2 && input != null && outputs.Length >= 2)
+        if (llms.Length >= 1 && inputs.Length >= 1 && outputs.Length >= 1)
         {
-            var motherLLM = llms[0];
-            var childLLM = llms[1];
-            var motherOutput = outputs[0];
-            var childOutput = outputs[1];
+            llmPrimary = llms[0];
+            llmSecondary = llms.Length > 1 ? llms[1] : null;
+            currentInput = inputs[0];
+            outputPrimary = outputs[0];
+            outputSecondary = outputs.Length > 1 ? outputs[1] : null;
 
-            input.onSubmit.RemoveAllListeners();
-            input.onSubmit.AddListener((msg) =>
+            currentInput.onSubmit.RemoveAllListeners();
+            currentInput.onSubmit.AddListener((msg) =>
             {
-                input.interactable = false;
-                motherOutput.text = "...";
-
-                _ = motherLLM.Chat(msg, motherResponse =>
+                if (!string.IsNullOrWhiteSpace(msg))
                 {
-                    motherOutput.text = motherResponse;
-                    input.interactable = true;
-                    input.text = "";
-                    input.Select();
+                    SubmitMessage(msg);
+                }
+            });
 
-                    if (!hasPaidCustomer && motherResponse.Contains("$"))
+            if (submitButton != null)
+            {
+                submitButton.onClick.RemoveAllListeners();
+                submitButton.onClick.AddListener(() =>
+                {
+                    if (!string.IsNullOrWhiteSpace(currentInput.text))
                     {
-                        int gold = ExtractMoneyAmount(motherResponse);
-                        if (gold > 0)
-                        {
-                            Object.FindAnyObjectByType<PlayerMoney>().AddMoney(gold);
-                            hasPaidCustomer = true;
-                        }
-                    }
-
-                    if (motherResponse.Contains("[talk to child]"))
-                    {
-                        string toChild = motherResponse.Replace("[talk to child]", "").Trim();
-                        _ = childLLM.Chat("Mom says: " + toChild, childResponse =>
-                        {
-                            childOutput.text = childResponse;
-                        });
-                    }
-                    else if (Random.value < 0.5f) // child sometimes replies independently
-                    {
-                        _ = childLLM.Chat("The player said: " + msg, childResponse =>
-                        {
-                            childOutput.text = childResponse;
-                        });
+                        SubmitMessage(currentInput.text);
                     }
                 });
-            });
+            }
         }
+    }
+    private bool childResponding = false;
+
+    private void SubmitMessage(string msg)
+    {
+        if (!isConversationActive || llmPrimary == null) return;
+
+        currentInput.interactable = false;
+        outputPrimary.text = "...";
+
+        _ = llmPrimary.Chat(msg, response =>
+        {
+            if (!isConversationActive) return;
+
+            outputPrimary.text = response;
+            currentInput.text = "";
+            currentInput.interactable = true;
+            currentInput.Select();
+
+            if (!hasPaidCustomer && response.Contains("$"))
+            {
+                int gold = ExtractMoneyAmount(response);
+                if (gold > 0)
+                {
+                    Object.FindAnyObjectByType<PlayerMoney>().AddMoney(gold);
+                    hasPaidCustomer = true;
+                }
+            }
+
+            // CHILD CHAT SAFEGUARD
+            if (llmSecondary != null && outputSecondary != null && Random.value < 0.5f && !childResponding)
+            {
+                childResponding = true;
+
+                _ = llmSecondary.Chat("They said: " + msg, childResponse =>
+                {
+                    if (isConversationActive)
+                    {
+                        outputSecondary.text = childResponse;
+                    }
+
+                    //Reset after response
+                    childResponding = false;
+                });
+            }
+        });
     }
 
     int ExtractMoneyAmount(string response)
     {
-        var match = Regex.Match(response, @"\\$(\\d+)");
+        var match = Regex.Match(response, @"\$(\d+)");
         if (match.Success)
         {
             return int.Parse(match.Groups[1].Value);
@@ -98,6 +134,8 @@ public class CustomerManager : MonoBehaviour
     public void SendCustomerAway()
     {
         if (currentCustomer == null) return;
+
+        isConversationActive = false;
 
         var input = currentCustomer.GetComponentInChildren<InputField>();
         if (input != null)
@@ -121,15 +159,21 @@ public class CustomerManager : MonoBehaviour
 
     public void CancelAllRequests()
     {
+        isConversationActive = false;
+
         foreach (var interaction in activeInteractions)
         {
             interaction.AIReplyComplete();
         }
 
-        var llms = Object.FindObjectsByType<LLMCharacter>(FindObjectsSortMode.None);
+        // Clone list before iterating to avoid modification exception
+        var llms = new List<LLMCharacter>(Object.FindObjectsByType<LLMCharacter>(FindObjectsSortMode.None));
         foreach (var llm in llms)
         {
-            llm.CancelRequests();
+            if (llm != null)
+            {
+                llm.CancelRequests();
+            }
         }
 
         activeInteractions.Clear();

@@ -693,7 +693,7 @@ MonoBehaviour:
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 0
-    m_HorizontalOverflow: 0
+    m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
@@ -740,8 +740,8 @@ Transform:
   - {fileID: 3344051742443140232}
   - {fileID: 7808093507636394076}
   - {fileID: 6294511287774683278}
-  - {fileID: 72689969165159134}
   - {fileID: 3631060454423730983}
+  - {fileID: 72689969165159134}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1723763526558666354
@@ -1050,7 +1050,7 @@ MonoBehaviour:
   m_InputType: 0
   m_AsteriskChar: 42
   m_KeyboardType: 0
-  m_LineType: 1
+  m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 0
   m_CharacterLimit: 0
