@@ -38,7 +38,7 @@ public class LLMConversationManager : MonoBehaviour
 
         Task<string> taskA = characterA.Chat(inputForA);
         await Task.Delay(500); // slight delay to mimic thought
-        Task<string> taskB = characterB.Chat(inputForB);
+        Task<string> taskB = characterB.Chat(inputForB);//respond after when first chracter is done talking....
 
         lastResponseA = await taskA;
         characterAText.text = lastResponseA;
